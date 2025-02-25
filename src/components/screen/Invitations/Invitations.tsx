@@ -86,6 +86,7 @@ const Invitations = () => {
       status: "Open",
     });
   
+    
     const handleChange = (e: any) => {
       const { name, value, type, checked } = e.target;
       setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
