@@ -1,26 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface CounterState {
-  value: number;
-}
+const initialState = {
+ useId : ''
 
-const initialState: CounterState = { value: 0 };
+};
 
 const zivahireSlice = createSlice({
   name: "counter",
   initialState,
   reducers: {
-    increment: (state) => {
-      state.value += 1;
+    setUserId: (state, action) => {
+      state.useId = action.payload;
     },
-    decrement: (state) => {
-      state.value -= 1;
-    },
-    incrementByAmount: (state, action: PayloadAction<number>) => {
-      state.value += action.payload;
-    },
+
   },
 });
 
-export const { increment, decrement, incrementByAmount } = zivahireSlice.actions;
+export const {setUserId } = zivahireSlice.actions;
 export default zivahireSlice.reducer;

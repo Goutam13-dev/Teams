@@ -1,12 +1,12 @@
 import React from 'react'
-
+import { format } from 'date-fns';
 
   // Define the type for the table data
 interface TableRowData {
     id: number;
     name: string;
-    createdBy: string;
-    createdAt: string;
+    created_by: string;
+    created_at: string;
     invitedUser: string;
     submittedAt: string;
   }
@@ -16,9 +16,10 @@ interface TableRowData {
     data: TableRowData[];
     handleInviteUser:()=>void;
     handleSeeRequirements:()=>void;
+    setSelectedRequirementId:any;
   }
 
-const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements, handleInviteUser }) => {
+const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements, handleInviteUser, setSelectedRequirementId }) => {
   return (
     <>
       <style>{`
@@ -70,7 +71,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
           background-color: #218838;
         }
       `}</style>
-      <div className="table-container">
+      {data?.length ? <div className="table-container">
         <table className="atm-table">
           <thead>
             <tr>
@@ -86,19 +87,19 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
               <tr key={row.id}>
                 <td>{row.id}</td>
                 <td>{row.name}</td>
-                <td>{row.createdBy}</td>
-                <td>{row.createdAt}</td>
+                <td>{row.created_by}</td>
+                <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm:ss a")}</td>
                 <td>{row.invitedUser || "-"}</td>
                 <td>{row.submittedAt || "-"}</td>
                 <td>
                   <button onClick={handleInviteUser} className="invite-button">Invite User</button>
-                  <button onClick={handleSeeRequirements} className="requirement-button">See Requirement</button>
+                  <button onClick={()=>{handleSeeRequirements() , setSelectedRequirementId(row.id)}} className="requirement-button">See Requirement</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </div> : <div style={{display:'flex' , justifyContent:'center', alignItems:'end' , height:'250px' , fontSize:'24px' , fontWeight:600}}>No requirement Found</div> }
     </>
   )
 }
