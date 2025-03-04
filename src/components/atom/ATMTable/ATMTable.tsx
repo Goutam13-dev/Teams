@@ -55,6 +55,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
           cursor: pointer;
           border-radius: 4px;
           margin-right: 8px;
+          margin-bottom :5px
         }
         .requirement-button {
           background-color: #28a745;
@@ -91,7 +92,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
                 <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm:ss a")}</td>
                 <td>{row.invitedUser || "-"}</td>
                 <td>{row.submittedAt || "-"}</td>
-                <td>
+                <td >
                   <button onClick={handleInviteUser} className="invite-button">Invite User</button>
                   <button onClick={()=>{handleSeeRequirements() , setSelectedRequirementId(row.id)}} className="requirement-button">See Requirement</button>
                 </td>

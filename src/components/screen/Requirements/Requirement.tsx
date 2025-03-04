@@ -40,7 +40,7 @@ const Requirement = () => {
 
   const handleAddRequirements = async () => {
     try {
-      await addRequirements({ name: serachValue, created_by: '18fc5e1c-b1ae-463e-aa87' }).unwrap();
+      await addRequirements({ name: serachValue, created_by: useId }).unwrap();
       setIsOpenDialog(false)
       notify()
     } catch (error) {
@@ -58,7 +58,7 @@ const Requirement = () => {
 
   useEffect(() => {
     if (!singleRequirementDataIsFetching && !singleRequirementDataIsLoading) {
-      console.log(singleRequirementData, selectedRequirementId, "Goutam Bhaiya")
+      console.log(singleRequirementData, selectedRequirementId, "Goutam")
     }
   }, [data, isFetching, isLoading, selectedRequirementId, isOpenShowRequiremet])
 

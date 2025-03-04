@@ -1,0 +1,11 @@
+[33mcommit dd8942abf9fe1ab4679e4598641fa81fc9e113b9[m
+Author: Goutam13-dev <goutam.sharma@spectralshifttech.com>
+Date:   Sat Mar 1 19:21:41 2025 +0530
+
+    Removed hardcoded secrets from authConfig.ts
+
+[33mcommit 5d218deafe99af034b48be40bd4f6c1cb0aff497[m
+Author: Goutam13-dev <goutam.sharma@spectralshifttech.com>
+Date:   Sat Mar 1 19:01:21 2025 +0530
+
+    api integration are done

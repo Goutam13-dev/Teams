@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const zivahireServices = createApi({
   reducerPath: "api",
   tagTypes:['requirement'],
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://api.upswap.cloud/api'}), // Replace with your API URL
+  baseQuery: fetchBaseQuery({ baseUrl: 'https://api.upswap.cloud/api'}),
   endpoints: (builder) => ({
     getPosts: builder.query({
       providesTags:['requirement'],
@@ -11,7 +11,7 @@ export const zivahireServices = createApi({
     }),
     GetRequirement: builder.query({
       providesTags:['requirement'],
-      query: (id) => `get/requirement/18fc5e1c-b1ae-463e-aa87/`,
+      query: (id) => `get/requirement/${id}/`,
     }),
     GetRequirementById: builder.query({
       providesTags:['requirement'],
@@ -41,7 +41,7 @@ export const zivahireServices = createApi({
     }),
     GetInvitations: builder.query({
       providesTags:['requirement'],
-      query: (id) => `get/invitations/18fc5e1c-b1ae-463e-aa87/`,
+      query: (id) => `get/invitations/${id}/`,
     }),
   }),
 });

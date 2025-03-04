@@ -5,12 +5,35 @@ import { RootState } from "../../redux/store";
 import { useCreateInvitationFormMutation, useGetInvitationsQuery } from "../../redux/service/zivahireServices";
 import { Spinner, Toast, Toaster, ToastTitle, useToastController } from "@fluentui/react-components";
 import ATMBackdrop from "../../atom/ATMBackdrop/ATMBackdrop";
+import * as Yup from "yup";
+import * as microsoftTeams from "@microsoft/teams-js";
+import { Form, Formik, ErrorMessage } from "formik";
+import { format } from "date-fns";
 
-
+interface FormValues {
+  sawMachineAccess: boolean;
+  jobRole: string;
+  managers: string;
+  groupName: string;
+  location: string;
+  positions: string;
+  task: string;
+  skillset: string;
+  level: string;
+  team: string;
+  project: string;
+  vendorName: string;
+  startDate: string;
+  notes: string;
+  canadaOk: boolean;
+  timezoneOk: boolean;
+  status: string;
+}
 const Invitations = () => {
   const [isOpenFormDialog, setIsOpenFormDialog] = useState(false);
   const [invitationsData, setInvitationsData] = useState([]);
   const [selectedInvitationId, setSelectedInvitationId] = useState('')
+  const [token , setToken] = useState('')
   const [addRequirements, addDataIsLoading] = useCreateInvitationFormMutation()
   const position = "top";
   const { dispatchToast } = useToastController('1234589');
@@ -23,8 +46,27 @@ const Invitations = () => {
     );
 
   const { useId } = useSelector((state: RootState) => state.counter);
+  const validationSchema = Yup.object({
+    sawMachineAccess: Yup.boolean(),
+    jobRole: Yup.string().required("Job Role is required"),
+    managers: Yup.string(),
+    groupName: Yup.string(),
+    location: Yup.string().required("Location/Remote is required"),
+    positions: Yup.number().required("No of Positions is required"),
+    task: Yup.string() ,
+    skillset: Yup.string(),
+    level: Yup.string(),
+    team: Yup.string(),
+    project: Yup.string(),
+    vendorName: Yup.string(),
+    startDate: Yup.date(),
+    notes: Yup.string(),
+    canadaOk: Yup.boolean(),
+    timezoneOk: Yup.boolean(),
+    status: Yup.string(),
+  });
 
-  const [formData, setFormData] = useState<any>({
+  const initialValues: FormValues = {
     sawMachineAccess: false,
     jobRole: "",
     managers: "",
@@ -34,52 +76,43 @@ const Invitations = () => {
     task: "",
     skillset: "",
     level: "",
-    notes: "",
-    canadaOk: false,
-    timezoneOk: false,
     team: "",
     project: "",
     vendorName: "",
     startDate: "",
+    notes: "",
+    canadaOk: false,
+    timezoneOk: false,
     status: "Open",
-  });
+  }
 
 
-  const handleChange = (e: any) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
-  };
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
+  const handleSubmit = async (values: any) => {
     const formattedValue = {
       requirement: selectedInvitationId,
-      // submitted_by:useId, 
-      submitted_by: '18fc5e1c-b1ae-463e-aa87',
-      saw_machine_access: formData?.sawMachineAccess,
-      job_role: formData?.jobRole,
-      managers_to_work_with: formData?.managers,
-      group_name: formData?.groupName,
-      location_remote: formData?.location,
-      no_of_positions: formData?.positions,
-      task: formData?.task,
-      required_skillset: formData?.skillset,
-      level: formData?.level,
-      notes: formData?.notes,
-      canada_ok: formData?.canadaOk,
-      et_mt_ct_timezone_ok: formData?.timezoneOk,
-      team: formData?.team,
-      project: formData?.project,
-      vendor_name: formData?.vendorName,
-      start_date: formData?.startDate,
-      status: formData?.status
+      submitted_by:useId, 
+      saw_machine_access: values?.sawMachineAccess,
+      job_role: values?.jobRole,
+      managers_to_work_with: values?.managers,
+      group_name: values?.groupName,
+      location_remote: values?.location,
+      no_of_positions: values?.positions,
+      task: values?.task,
+      required_skillset: values?.skillset,
+      level: values?.level,
+      notes: values?.notes,
+      canada_ok: values?.canadaOk,
+      et_mt_ct_timezone_ok: values?.timezoneOk,
+      team: values?.team,
+      project: values?.project,
+      vendor_name: values?.vendorName,
+      start_date: format(new Date(values.startDate), "yyyy-MM-dd"),
+      status: values?.status
     }
     try {
       await addRequirements(formattedValue).unwrap();
       setIsOpenFormDialog(false)
       notify()
-      setFormData({})
     } catch (error) {
       console.error('Failed to save the post:', error);
     }
@@ -89,68 +122,49 @@ const Invitations = () => {
   const { data, isFetching, isLoading } = useGetInvitationsQuery(useId, { skip: !useId });
 
   useEffect(() => {
+    searchUsers()
     if (!isFetching && !isLoading) {
       setInvitationsData(data?.data)
     }
   }, [data, isFetching, isLoading])
 
-  // const getClientSideToken = async () => {
-  //   try {
-  //     return await microsoftTeams.authentication.getAuthToken();
-  //   } catch (error) {
-  //     console.error("Error getting client-side token:", error);
-  //     return null;
-  //   }
-  // };
- 
-  // const getOboToken = async (accessToken: string | null) => {
-  // console.log(accessToken ,'Goutam')
-  //   if (!accessToken) {
-  //     console.error("No access token received");
-  //     return null;
-  //   }
- 
-  //   try {
-  //     const response = await fetch("https://api.upswap.cloud/api/get/obo-token/", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ idToken: accessToken }),
-  //     });
- 
-  //     if (!response.ok) throw new Error("Failed to fetch OBO token");
- 
-  //     const data = await response.json();
-  //     localStorage.setItem("graphToken", data.accessToken);
-  //     return data.accessToken;
-  //   } catch (error) {
-  //     console.error("Error fetching OBO token:", error);
-  //     return null;
-  //   }
-  // };
- 
-  // const searchUsers = async () => {
-  //   const teamsToken = await getClientSideToken();
-  //   const graphToken = await getOboToken(teamsToken);
-  //   console.log(graphToken , teamsToken , 'Goutam')
- 
-  //   try {
-  //     const response = await fetch("https://graph.microsoft.com/v1.0/users", {
-  //       method: "GET",
-  //       headers: {
-  //         Authorization: `Bearer ${graphToken}`,
-  //         ConsistencyLevel: "eventual",
-  //       },
-  //     });
- 
-  //     const data = await response.json();
-  //     console.log("Fetched Users:", data);
-  //   } catch (error) {
-  //     console.error("Error fetching users:", error);
-  //   }
-  // };
- 
+  const getClientSideToken = async () => {
+    try {
+      return await microsoftTeams.authentication.getAuthToken();
+    } catch (error) {
+      console.error("Error getting client-side token:", error);
+      return null;
+    }
+  };
+
+
+
+  const searchUsers = async () => {
+    const accessToken = await getClientSideToken();
+    setToken(accessToken || '')
+    const url = `https://your-function-app.azurewebsites.net/api/searchUsers?q=${encodeURIComponent('Rahul')}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.results; // List of users
+    } catch (error) {
+      console.error("Error searching users:", error);
+      return [];
+    }
+  };
+
   return (
     <div>
       <Toaster toasterId={"1234589"} />
@@ -205,7 +219,10 @@ const Invitations = () => {
       `}</style>
       <div className="table-container">
         {(isLoading || isFetching) ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}><Spinner size="huge" /></div> :
-          invitationsData?.length ? <table className="atm-table">
+          invitationsData?.length ?
+          <div>
+            <div style={{fontSize:'14px'}}>{token}</div>
+             <table className="atm-table">
             <thead>
               <tr>
                 {["ID", "Name", "Created By", "Created At", "Invited User", "Submitted At", "Actions"].map(
@@ -230,162 +247,145 @@ const Invitations = () => {
                 </tr>
               ))}
             </tbody>
-          </table> : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'end', height: '250px', fontSize: '24px', fontWeight: 600 }}>No Invitations Found</div>}
+          </table>
+          </div> : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px', fontSize: '24px', fontWeight: 600 }}>No Invitations Found</div>}
       </div>
       {isOpenFormDialog && <ATMDialog size='large' title='Invitation Details' onClose={() => setIsOpenFormDialog(false)}>
-        <form
+        <Formik<FormValues>
+          enableReinitialize
+          initialValues={initialValues}
+          validationSchema={validationSchema}
           onSubmit={handleSubmit}
-          style={{
-            margin: "auto",
-            padding: "20px",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-            maxWidth: "700px",
-            backgroundColor: "#fff",
-          }}
         >
-          {addDataIsLoading?.isLoading && <ATMBackdrop />}
-          {/* Checkbox */}
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold", }}>
-              <input
-                type="checkbox"
-                name="sawMachineAccess"
-                checked={formData.sawMachineAccess}
-                onChange={handleChange}
-              />
-              SAW Machine Access
-            </label>
-          </div>
-
-          {/* Fields */}
-          {[
-            ["jobRole", "Job Role", "managers", "Managers to Work With"],
-            ["groupName", "Group Name", "location", "Location/Remote"],
-            ["positions", "No of Positions", "task", "Task"],
-            ["skillset", "Required Skillset", "level", "Level"],
-            ["team", "Team", "project", "Project"],
-            ["vendorName", "Vendor Name", "startDate", "Start Date"],
-          ].map(([name1, label1, name2, label2]) => (
-            <div key={name1} style={{ display: "flex", gap: "20px", marginBottom: "15px" }}>
-              <div style={{ flex: "1" }}>
-                <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
-                  {label1}
-                </label>
-                <input
-                  type={name1 === "positions" ? "number" : name1 === "startDate" ? "date" : "text"}
-                  name={name1}
-                  value={formData[name1]}
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                  }}
-                />
-              </div>
-              <div style={{ flex: "1" }}>
-                <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
-                  {label2}
-                </label>
-                <input
-                  type={name2 === "positions" ? "number" : name2 === "startDate" ? "date" : "text"}
-                  name={name2}
-                  value={formData[name2]}
-                  onChange={handleChange}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-
-          {/* Notes Field */}
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px", }}>
-              Notes
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              rows={3}
+          {({ isSubmitting, values, setFieldValue }) => (
+            <Form
               style={{
-                width: "100%",
-                padding: "8px",
+                margin: "auto",
+                padding: "20px",
                 border: "1px solid #ccc",
-                borderRadius: "4px",
-                resize: "none",
-              }}
-            />
-          </div>
-
-          {/* Checkboxes */}
-          <div style={{ display: "flex", gap: "20px", marginBottom: "15px" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold", }}>
-              <input
-                type="checkbox"
-                name="canadaOk"
-                checked={formData.canadaOk}
-                onChange={handleChange}
-              />
-              Canada OK?
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold", }}>
-              <input
-                type="checkbox"
-                name="timezoneOk"
-                checked={formData.timezoneOk}
-                onChange={handleChange}
-              />
-              ET/MT/CT Timezone OK?
-            </label>
-          </div>
-
-          {/* Status Dropdown */}
-          <div style={{ marginBottom: "15px" }}>
-            <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
-              Status
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
+                borderRadius: "8px",
+                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+                maxWidth: "700px",
+                backgroundColor: "#fff",
               }}
             >
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-              <option value="Pending">Pending</option>
-            </select>
-          </div>
+              {addDataIsLoading?.isLoading && <ATMBackdrop />}
+              <div style={{ marginBottom: "15px" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                  <input
+                    type="checkbox"
+                    name="sawMachineAccess"
+                    checked={values.sawMachineAccess}
+                    onChange={(e) => setFieldValue("sawMachineAccess", e.target.checked)}
+                  />
+                  SAW Machine Access
+                </label>
+              </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              padding: "10px",
-              backgroundColor: "#3B82F6",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Submit
-          </button>
-        </form>
+              {[
+                ["jobRole", "managers"],
+                ["groupName", "location"],
+                ["positions", "task"],
+                ["skillset", "level"],
+                ["team", "project"],
+                ["vendorName", "startDate"],
+              ].map(([name1, name2]) => (
+                <div key={name1} style={{ display: "flex", gap: "20px", marginBottom: '8px' }}>
+                  {[name1, name2].map((name) => (
+                    <div key={name} style={{ flex: "1" }}>
+                      <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
+                        {name.replace(/([A-Z])/g, " $1").trim()}
+                      </label>
+                      <input
+                        placeholder={`Enter ${name}`}
+                        type={name === "positions" ? "number" : name === "startDate" ? "date" : "text"}
+                        name={name}
+                        value={
+                          typeof values[name as keyof FormValues] === "boolean"
+                            ? ""
+                            : (values[name as keyof FormValues] as string | number)
+                        }
+                        onChange={(e) => setFieldValue(name as keyof FormValues, e.target.value)}
+                        style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
+                      />
+                      <ErrorMessage name={name}>
+                        {(msg) => <div style={{ color: "red", fontSize: "12px" }}>{msg}</div>}
+                      </ErrorMessage>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Notes</label>
+                <textarea
+                  name="notes"
+                  rows={3}
+                  value={values.notes}
+                  onChange={(e) => setFieldValue("notes", e.target.value)}
+                  style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px", resize: "none" }}
+                />
+                <ErrorMessage name="notes">
+                  {(msg) => <div style={{ color: "red", fontSize: "12px" }}>{msg}</div>}
+                </ErrorMessage>
+              </div>
+
+              <div style={{ display: "flex", gap: "20px", marginBottom: '15px' }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                  <input
+                    type="checkbox"
+                    name="canadaOk"
+                    checked={values.canadaOk}
+                    onChange={(e) => setFieldValue("canadaOk", e.target.checked)}
+                  />
+                  Canada OK?
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                  <input
+                    type="checkbox"
+                    name="timezoneOk"
+                    checked={values.timezoneOk}
+                    onChange={(e) => setFieldValue("timezoneOk", e.target.checked)}
+                  />
+                  ET/MT/CT Timezone OK?
+                </label>
+              </div>
+
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Status</label>
+                <select
+                  name="status"
+                  value={values.status}
+                  onChange={(e) => setFieldValue("status", e.target.value)}
+                  style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
+                >
+                  <option value="Open">Open</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Pending">Pending</option>
+                </select>
+                <ErrorMessage name="status">
+                  {(msg) => <div style={{ color: "red", fontSize: "12px" }}>{msg}</div>}
+                </ErrorMessage>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  backgroundColor: "#3B82F6",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                Submit
+              </button>
+            </Form>
+          )}
+        </Formik>
       </ATMDialog>}
     </div>
   )
