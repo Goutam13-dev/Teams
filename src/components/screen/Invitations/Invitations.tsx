@@ -218,10 +218,10 @@ const Invitations = () => {
         }
       `}</style>
       <div className="table-container">
+      <div style={{fontSize:'14px'}}>{token}</div>
         {(isLoading || isFetching) ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}><Spinner size="huge" /></div> :
           invitationsData?.length ?
           <div>
-            <div style={{fontSize:'14px'}}>{token}</div>
              <table className="atm-table">
             <thead>
               <tr>
