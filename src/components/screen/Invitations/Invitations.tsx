@@ -6,7 +6,6 @@ import { useCreateInvitationFormMutation, useGetInvitationsQuery } from "../../r
 import { Spinner, Toast, Toaster, ToastTitle, useToastController } from "@fluentui/react-components";
 import ATMBackdrop from "../../atom/ATMBackdrop/ATMBackdrop";
 import * as Yup from "yup";
-import * as microsoftTeams from "@microsoft/teams-js";
 import { Form, Formik, ErrorMessage } from "formik";
 import { format } from "date-fns";
 
@@ -33,9 +32,6 @@ const Invitations = () => {
   const [isOpenFormDialog, setIsOpenFormDialog] = useState(false);
   const [invitationsData, setInvitationsData] = useState([]);
   const [selectedInvitationId, setSelectedInvitationId] = useState('')
-  const [token , setToken] = useState('')
-  const [graphtoken , setgraphToken] = useState('')
-  const [errorMessage , seterrorMessage] = useState('')
   const [addRequirements, addDataIsLoading] = useCreateInvitationFormMutation()
   const position = "top";
   const { dispatchToast } = useToastController('1234589');
@@ -124,73 +120,13 @@ const Invitations = () => {
   const { data, isFetching, isLoading } = useGetInvitationsQuery(useId, { skip: !useId });
 
   useEffect(() => {
-    searchUsers()
+   
     if (!isFetching && !isLoading) {
       setInvitationsData(data?.data)
     }
   }, [data, isFetching, isLoading])
 
-  const getClientSideToken = async () => {
-    try {
-      return await microsoftTeams.authentication.getAuthToken();
-    } catch (error) {
-      console.error("Error getting client-side token:", error);
-      return null;
-    }
-  };
-
-  const getOboToken = async (accessToken: string | null) => {
-      if (!accessToken) {
-        console.error("No access token received");
-        return null;
-      }
-   
-      try {
-        const response = await fetch("https://api.upswap.cloud/api/get/obo-token/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ idToken: accessToken }),
-        });
-   
-        const data = await response.json();
-        localStorage.setItem("graphToken", data.accessToken);
-        seterrorMessage(data.error)
-        return data.accessToken;
-      } catch (error) {
-        console.error("Error fetching OBO token:", error);
-        return null;
-      }
-    };
-
-  const searchUsers = async () => {
-    const accessToken = await getClientSideToken();
-    const graphToken = await getOboToken(accessToken) ;
-    setgraphToken(graphToken || '')
-    setToken(accessToken || '')
-    const url = `https://graph.microsoft.com/v1.0/users/?$filter=startswith(displayName, '${encodeURIComponent('rahul')}')`;
-
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${graphToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.results; // List of users
-    } catch (error) {
-      console.error("Error searching users:", error);
-      return [];
-    }
-  };
+ 
 
   return (
     <div>
@@ -245,10 +181,6 @@ const Invitations = () => {
         }
       `}</style>
       <div className="table-container">
-      <div style={{fontSize:'14px'}}> Error : {errorMessage}</div>
-      <div style={{fontSize:'14px'}}> GraphToken : {graphtoken}</div>
-      <div style={{fontSize:'14px'}}> AccessToken  : {token}</div>
-
         {(isLoading || isFetching) ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}><Spinner size="huge" /></div> :
           invitationsData?.length ?
           <div>

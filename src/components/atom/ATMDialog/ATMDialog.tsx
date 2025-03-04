@@ -17,7 +17,7 @@ const ATMDialog = ({
   const sizeStyles: Record<string, React.CSSProperties> = {
     small: { width: "100%", maxWidth: "20rem", height: "10rem" },
     medium: { width: "100%", maxWidth: "28rem", height: "15rem" },
-    large: { width: "100%", maxWidth: "48rem", height: "35rem" },
+    large: { width: "100%", maxWidth: "40rem", height: "35rem" },
     extraLarge: { width: "100%", maxWidth: "64rem", height: "45rem" },
   };
 

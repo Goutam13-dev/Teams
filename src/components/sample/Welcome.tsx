@@ -49,7 +49,6 @@ export function Welcome(props: { showFunction?: boolean; environment?: string })
     return context.app.host.name;
   })?.data;
 
-  console.log(hubName , "Goutam")
   return (
     <div className="welcome page">
       <div className="narrow page-padding">

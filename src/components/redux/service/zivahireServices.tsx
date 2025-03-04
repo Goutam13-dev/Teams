@@ -43,8 +43,19 @@ export const zivahireServices = createApi({
       providesTags:['requirement'],
       query: (id) => `get/invitations/${id}/`,
     }),
+    addInviteUsers: builder.mutation({
+      invalidatesTags:['requirement'],
+      query: (newPost) => ({
+        url: "invite-user/",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: newPost,
+      }),
+    }),
   }),
 });
 
-export const { useGetPostsQuery,useGetRequirementQuery , useCreateRequiremmentMutation, useGetRequirementByIdQuery , useGetInvitationsQuery, useCreateInvitationFormMutation } = zivahireServices;
+export const { useGetPostsQuery,useGetRequirementQuery , useCreateRequiremmentMutation, useGetRequirementByIdQuery , useGetInvitationsQuery, useCreateInvitationFormMutation , useAddInviteUsersMutation } = zivahireServices;
 export default zivahireServices;

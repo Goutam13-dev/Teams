@@ -6,7 +6,8 @@ env/.env.local
 build
 appPackage/build
 .deployment
-.localConfigs
+.localConfigs 
+dist
 
 # dependencies
 /node_modules

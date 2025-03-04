@@ -5,9 +5,8 @@ import { format } from 'date-fns';
 interface TableRowData {
     id: number;
     name: string;
-    created_by: string;
     created_at: string;
-    invitedUser: string;
+    invited_users: any;
     submittedAt: string;
   }
   
@@ -76,7 +75,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
         <table className="atm-table">
           <thead>
             <tr>
-              {["ID", "Name", "Created By", "Created At", "Invited User", "Submitted At", "Actions"].map(
+              {["ID", "Name", "Created At", "Invited User", "Submitted At", "Actions"].map(
                 (header) => (
                   <th key={header}>{header}</th>
                 )
@@ -88,12 +87,11 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
               <tr key={row.id}>
                 <td>{row.id}</td>
                 <td>{row.name}</td>
-                <td>{row.created_by}</td>
                 <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm:ss a")}</td>
-                <td>{row.invitedUser || "-"}</td>
+                <td>{row.invited_users?.length ? row?.invited_users.map((el:any)=>el) : "-"}</td>
                 <td>{row.submittedAt || "-"}</td>
                 <td >
-                  <button onClick={handleInviteUser} className="invite-button">Invite User</button>
+                  <button onClick={()=>{handleInviteUser() , setSelectedRequirementId(row.id)}} className="invite-button">Invite User</button>
                   <button onClick={()=>{handleSeeRequirements() , setSelectedRequirementId(row.id)}} className="requirement-button">See Requirement</button>
                 </td>
               </tr>
