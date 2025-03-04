@@ -34,6 +34,8 @@ const Invitations = () => {
   const [invitationsData, setInvitationsData] = useState([]);
   const [selectedInvitationId, setSelectedInvitationId] = useState('')
   const [token , setToken] = useState('')
+  const [graphtoken , setgraphToken] = useState('')
+  const [errorMessage , seterrorMessage] = useState('')
   const [addRequirements, addDataIsLoading] = useCreateInvitationFormMutation()
   const position = "top";
   const { dispatchToast } = useToastController('1234589');
@@ -137,18 +139,43 @@ const Invitations = () => {
     }
   };
 
-
+  const getOboToken = async (accessToken: string | null) => {
+      if (!accessToken) {
+        console.error("No access token received");
+        return null;
+      }
+   
+      try {
+        const response = await fetch("https://api.upswap.cloud/api/get/obo-token/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken: accessToken }),
+        });
+   
+        const data = await response.json();
+        localStorage.setItem("graphToken", data.accessToken);
+        seterrorMessage(data.error)
+        return data.accessToken;
+      } catch (error) {
+        console.error("Error fetching OBO token:", error);
+        return null;
+      }
+    };
 
   const searchUsers = async () => {
     const accessToken = await getClientSideToken();
+    const graphToken = await getOboToken(accessToken) ;
+    setgraphToken(graphToken || '')
     setToken(accessToken || '')
-    const url = `https://your-function-app.azurewebsites.net/api/searchUsers?q=${encodeURIComponent('Rahul')}`;
+    const url = `https://graph.microsoft.com/v1.0/users/?$filter=startswith(displayName, '${encodeURIComponent('rahul')}')`;
 
     try {
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${graphToken}`,
           "Content-Type": "application/json",
         },
       });
@@ -218,7 +245,10 @@ const Invitations = () => {
         }
       `}</style>
       <div className="table-container">
-      <div style={{fontSize:'14px'}}>{token}</div>
+      <div style={{fontSize:'14px'}}> Error : {errorMessage}</div>
+      <div style={{fontSize:'14px'}}> GraphToken : {graphtoken}</div>
+      <div style={{fontSize:'14px'}}> AccessToken  : {token}</div>
+
         {(isLoading || isFetching) ? <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '300px' }}><Spinner size="huge" /></div> :
           invitationsData?.length ?
           <div>

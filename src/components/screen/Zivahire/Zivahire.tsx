@@ -16,7 +16,6 @@ const Zivahire = () => {
       return await teamsUserCredential.getUserInfo();
     }
   });
-  console.log(userData)
   useEffect(() => {
     localStorage.setItem('userData', JSON.stringify(userData) as any)
     dispatch(setUserId(userData?.objectId))

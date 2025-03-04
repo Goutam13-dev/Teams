@@ -58,7 +58,7 @@ const Requirement = () => {
 
   useEffect(() => {
     if (!singleRequirementDataIsFetching && !singleRequirementDataIsLoading) {
-      console.log(singleRequirementData, selectedRequirementId, "Goutam")
+      console.log(singleRequirementData, selectedRequirementId, "Data")
     }
   }, [data, isFetching, isLoading, selectedRequirementId, isOpenShowRequiremet])
 
