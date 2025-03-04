@@ -104,7 +104,7 @@ const Invitations = () => {
       team: values?.team,
       project: values?.project,
       vendor_name: values?.vendorName,
-      start_date: format(new Date(values.startDate), "yyyy-MM-dd"),
+      start_date:values.startDate ?  format(new Date(values.startDate), "yyyy-MM-dd") :format(new Date(), "yyyy-MM-dd"),
       status: values?.status
     }
     try {

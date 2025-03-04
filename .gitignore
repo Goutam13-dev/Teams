@@ -8,6 +8,7 @@ appPackage/build
 .deployment
 .localConfigs 
 dist
+api/node_modules
 
 # dependencies
 /node_modules
