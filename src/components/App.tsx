@@ -5,7 +5,6 @@ import {
   teamsDarkTheme,
   teamsHighContrastTheme,
   Spinner,
-  tokens,
 } from "@fluentui/react-components";
 import { HashRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import { useTeamsUserCredential } from "@microsoft/teamsfx-react";
@@ -14,7 +13,6 @@ import TermsOfUse from "./TermsOfUse";
 import { TeamsFxContext } from "./Context";
 import config from "./sample/lib/config";
 import Zivahire from "./screen/Zivahire/Zivahire";
-import { Welcome } from "./sample/Welcome";
 
 /**
  * The main app which handles the initialization and routing

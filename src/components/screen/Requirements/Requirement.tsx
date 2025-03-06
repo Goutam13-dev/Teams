@@ -311,7 +311,7 @@ const Requirement = () => {
       {singleRequirementData?.data?.length ?  <div>
         <div style={{ flex: "1", minWidth: "45%", display: "flex", gap: "5px" , border:'1px solid gray' , padding:'8px' , borderRadius:'10px', marginBottom:'10px' }}>
           <span style={{ fontWeight: 600 }}>Submitted By:</span>
-          <span>{singleJobDetails?.submitted_by}</span>
+          <span>{singleJobDetails?.submitted_by.map((obj:any) => Object.values(obj)[0])}</span>
         </div>
         <div style={{ flex: "1", minWidth: "45%", display: "flex", gap: "5px" , border:'1px solid gray' , padding:'8px' , borderRadius:'10px' }}>
           <span style={{ fontWeight: 600 }}>Submitted Date:</span>
@@ -375,9 +375,7 @@ const Requirement = () => {
       </div>
       </div>: <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px', fontSize: '24px', fontWeight: 600 , color:'red' }}> {(!singleRequirementDataIsFetching || !singleRequirementDataIsLoading) &&'No Requirement Found'}</div> }
     </div>
-        
         </ATMDialog>}
-        <div>Graph : {graphTokenState}</div>
     </div>
   )
 }

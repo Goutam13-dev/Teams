@@ -54,8 +54,27 @@ export const zivahireServices = createApi({
         body: newPost,
       }),
     }),
+    updateInviteRequirements: builder.mutation({
+      invalidatesTags:['requirement'],
+      query: (newPost) => ({
+        url: "/update/requirement-details/",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: "PATCH",
+        body: newPost,
+      }),
+    }),
   }),
 });
 
-export const { useGetPostsQuery,useGetRequirementQuery , useCreateRequiremmentMutation, useGetRequirementByIdQuery , useGetInvitationsQuery, useCreateInvitationFormMutation , useAddInviteUsersMutation } = zivahireServices;
+export const { useGetPostsQuery, 
+  useGetRequirementQuery,
+  useCreateRequiremmentMutation,
+  useGetRequirementByIdQuery,
+  useGetInvitationsQuery,
+  useCreateInvitationFormMutation,
+  useAddInviteUsersMutation,
+  useUpdateInviteRequirementsMutation
+} = zivahireServices;
 export default zivahireServices;

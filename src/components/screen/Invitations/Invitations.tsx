@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import ATMDialog from "../../atom/ATMDialog/ATMDialog";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { useCreateInvitationFormMutation, useGetInvitationsQuery } from "../../redux/service/zivahireServices";
+import { useCreateInvitationFormMutation, useGetInvitationsQuery, useGetRequirementByIdQuery, useUpdateInviteRequirementsMutation } from "../../redux/service/zivahireServices";
 import { Spinner, Toast, Toaster, ToastTitle, useToastController } from "@fluentui/react-components";
 import ATMBackdrop from "../../atom/ATMBackdrop/ATMBackdrop";
 import * as Yup from "yup";
 import { Form, Formik, ErrorMessage } from "formik";
 import { format } from "date-fns";
+import { Edit12Regular } from '@fluentui/react-icons';
+import {Tooltip } from "@fluentui/react-components";
+
 
 interface FormValues {
   sawMachineAccess: boolean;
@@ -32,7 +35,11 @@ const Invitations = () => {
   const [isOpenFormDialog, setIsOpenFormDialog] = useState(false);
   const [invitationsData, setInvitationsData] = useState([]);
   const [selectedInvitationId, setSelectedInvitationId] = useState('')
+  const [invitationnRequirement, setInvitationRequirement] = useState<any>({})
+  const [wantToEdit , setWantToEdit] = useState(false)
+
   const [addRequirements, addDataIsLoading] = useCreateInvitationFormMutation()
+  const [updateRequirements, updateDataIsLoading] =useUpdateInviteRequirementsMutation()
   const position = "top";
   const { dispatchToast } = useToastController('1234589');
   const notify = () =>
@@ -44,6 +51,9 @@ const Invitations = () => {
     );
 
   const { useId , userName } = useSelector((state: RootState) => state.counter);
+
+  const { data, isFetching, isLoading } = useGetInvitationsQuery(useId, { skip: !useId });
+  const {data:InvitationRequirementData , isFetching:InvitationRequirementDataIsFetching , isLoading :InvitationRequirementDataIsLoading}=useGetRequirementByIdQuery(selectedInvitationId , {skip:!selectedInvitationId})
   const validationSchema = Yup.object({
     sawMachineAccess: Yup.boolean(),
     jobRole: Yup.string().required("Job Role is required"),
@@ -65,30 +75,30 @@ const Invitations = () => {
   });
 
   const initialValues: FormValues = {
-    sawMachineAccess: false,
-    jobRole: "",
-    managers: "",
-    groupName: "",
-    location: "",
-    positions: "",
-    task: "",
-    skillset: "",
-    level: "",
-    team: "",
-    project: "",
-    vendorName: "",
-    startDate: "",
-    notes: "",
-    canadaOk: false,
-    timezoneOk: false,
-    status: "Open",
+    sawMachineAccess: invitationnRequirement?.submitted_by_name || false,
+    jobRole: invitationnRequirement?.job_role || "",
+    managers: invitationnRequirement?.managers_to_work_with || "",
+    groupName: invitationnRequirement?.group_name || "",
+    location: invitationnRequirement?.location_remote || "",
+    positions: invitationnRequirement?.no_of_positions || "",
+    task: invitationnRequirement?.task || "",
+    skillset: invitationnRequirement?.required_skillset || "",
+    level: invitationnRequirement?.level || "",
+    team: invitationnRequirement?.team || "",
+    project: invitationnRequirement?.project || "",
+    vendorName: invitationnRequirement?.vendor_name || "",
+    startDate: invitationnRequirement?.start_date || "",
+    notes: invitationnRequirement?.notes || "",
+    canadaOk:invitationnRequirement?.canada_ok  || false,
+    timezoneOk:invitationnRequirement?.et_mt_ct_timezone_ok  || false,
+    status:invitationnRequirement?.status  || "Open",
   }
 
 
   const handleSubmit = async (values: any) => {
     const formattedValue = {
       requirement: selectedInvitationId,
-      submitted_by:useId, 
+      submitted_by : [{ [useId]: userName }],
       submitted_by_name:userName,
       saw_machine_access: values?.sawMachineAccess,
       job_role: values?.jobRole,
@@ -108,17 +118,24 @@ const Invitations = () => {
       start_date:values.startDate ?  format(new Date(values.startDate), "yyyy-MM-dd") :null,
       status: values?.status
     }
-    try {
-      await addRequirements(formattedValue).unwrap();
-      setIsOpenFormDialog(false)
-      notify()
-    } catch (error) {
-      console.error('Failed to save the post:', error);
+    if(InvitationRequirementData?.present){
+      try {
+        await  updateRequirements(formattedValue).unwrap();
+        setIsOpenFormDialog(false)
+        notify()
+      } catch (error) {
+        console.error('Failed to save the post:', error);
+      }
+    }else{
+      try {
+        await addRequirements(formattedValue).unwrap();
+        setIsOpenFormDialog(false)
+        notify()
+      } catch (error) {
+        console.error('Failed to save the post:', error);
+      }
     }
   };
-
-
-  const { data, isFetching, isLoading } = useGetInvitationsQuery(useId, { skip: !useId });
 
   useEffect(()=>{
     if (!isFetching && !isLoading) {
@@ -126,7 +143,12 @@ const Invitations = () => {
     }
   }, [data, isFetching, isLoading])
 
- 
+  useEffect(()=>{
+    if (!InvitationRequirementDataIsLoading && !InvitationRequirementDataIsFetching) {
+      setInvitationRequirement(InvitationRequirementData?.data?.[0])
+      setWantToEdit(InvitationRequirementData?.present)
+    }
+  }, [InvitationRequirementDataIsFetching, InvitationRequirementData, InvitationRequirementDataIsLoading])
 
   return (
     <div>
@@ -217,6 +239,12 @@ const Invitations = () => {
           </div> : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px', fontSize: '24px', fontWeight: 600 }}>No Invitations Found</div>}
       </div>
       {isOpenFormDialog && <ATMDialog size='large' title='Invitation Details' onClose={() => setIsOpenFormDialog(false)}>
+        <div>
+         {InvitationRequirementData?.present &&  <div onClick={()=>setWantToEdit(!wantToEdit)} style={{display:'flex' , justifyContent:'end', cursor:'pointer'}}>
+            <Tooltip content="Edit" relationship="label" >
+            <Edit12Regular style={{width:'20px' , height:'30px' , color: !wantToEdit?  '#6264A7':'red'}}/>
+             </Tooltip>
+          </div>}
         <Formik<FormValues>
           enableReinitialize
           initialValues={initialValues}
@@ -235,10 +263,12 @@ const Invitations = () => {
                 backgroundColor: "#fff",
               }}
             >
-              {addDataIsLoading?.isLoading && <ATMBackdrop />}
+              
+              {(InvitationRequirementDataIsLoading || InvitationRequirementDataIsLoading  ) && <ATMBackdrop />}
               <div style={{ marginBottom: "15px" }}>
                 <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
                   <input
+                  disabled={wantToEdit}
                     type="checkbox"
                     name="sawMachineAccess"
                     checked={values.sawMachineAccess}
@@ -263,6 +293,7 @@ const Invitations = () => {
                         {name.replace(/([A-Z])/g, " $1").trim()}
                       </label>
                       <input
+                       disabled={wantToEdit}
                         placeholder={`Enter ${name}`}
                         type={name === "positions" ? "number" : name === "startDate" ? "date" : "text"}
                         name={name}
@@ -285,6 +316,7 @@ const Invitations = () => {
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Notes</label>
                 <textarea
+                 disabled={wantToEdit}
                 placeholder="Write note..."
                   name="notes"
                   rows={3}
@@ -300,6 +332,7 @@ const Invitations = () => {
               <div style={{ display: "flex", gap: "20px", marginBottom: '15px' }}>
                 <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
                   <input
+                   disabled={wantToEdit}
                     type="checkbox"
                     name="canadaOk"
                     checked={values.canadaOk}
@@ -309,6 +342,7 @@ const Invitations = () => {
                 </label>
                 <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
                   <input
+                   disabled={wantToEdit}
                     type="checkbox"
                     name="timezoneOk"
                     checked={values.timezoneOk}
@@ -321,6 +355,7 @@ const Invitations = () => {
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Status</label>
                 <select
+                 disabled={wantToEdit}
                   name="status"
                   value={values.status}
                   onChange={(e) => setFieldValue("status", e.target.value)}
@@ -348,11 +383,12 @@ const Invitations = () => {
                   cursor: "pointer",
                 }}
               >
-                Submit
+                {(addDataIsLoading?.isLoading || updateDataIsLoading?.isLoading) ? <Spinner size='tiny'/> :'Submit'}
               </button>
             </Form>
           )}
         </Formik>
+        </div>
       </ATMDialog>}
     </div>
   )

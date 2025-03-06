@@ -46,7 +46,7 @@
         "${{TAB_HOSTNAME}}"
     ],
     "webApplicationInfo": {
-        "id": "${{AAD_APP_CLIENT_ID}}",
-        "resource": "api://${{TAB_DOMAIN}}/${{AAD_APP_CLIENT_ID}}"
+        "id": "${{TEAMS_APP_ID}}",
+        "resource": "api://${{TAB_DOMAIN}}/${{TEAMS_APP_ID}}"
     }
 }
