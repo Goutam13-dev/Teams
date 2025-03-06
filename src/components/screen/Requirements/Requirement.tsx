@@ -115,7 +115,6 @@ const Requirement = () => {
       }
     };
 
-    //Toast 
   const { dispatchToast } = useToastController('12345');
   const position = "top";
   const notify = (message:string) =>
@@ -127,8 +126,8 @@ const Requirement = () => {
     );
 
     const handleSearchUsers =(e:any)=>{
-           searchUsers(e.target.value)
-           setinviteUserValue(e.target.value)
+      searchUsers(e.target.value)
+      setinviteUserValue(e.target.value)
     }
 
     const handleAddInviteUser= async (value:any)=>{
@@ -142,7 +141,7 @@ const Requirement = () => {
       }
     }
 
-
+console.log(singleJobDetails)
 
   return (
     <div>
@@ -206,12 +205,13 @@ const Requirement = () => {
             </button>
           </div>
         </div></ATMDialog>}
-      {isOpenInviteDialog && <ATMDialog size='large' onClose={() => setIsOpenInviteDialog(false)} title='Invite Users'>
+      {isOpenInviteDialog && <ATMDialog size='largeMedium' onClose={() => setIsOpenInviteDialog(false)} title='Invite Users'>
         <div style={{ overflowY: "auto", padding: "12px" }}>
 
           <div style={{ flex: '1', minWidth: '45%', display: 'flex', flexDirection: 'column' }}>
             <label style={{ fontWeight: 'bold', marginBottom: '5px' }}>Search User</label>
             <input
+            placeholder='Enter user name'
              value={inviteUserValue}
              onChange={handleSearchUsers}
              style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
@@ -224,22 +224,6 @@ const Requirement = () => {
                 <option key={index} value={user}>{user}</option>
               ))}
             </select> */}
-          </div>
-          <div style={{ display: "flex", justifyContent: "end", gap: '10px', marginTop: '10px', alignContent: 'end' }}>
-           
-            <button
-              onClick={() => setIsOpenDialog(false)}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#DC2626",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
           </div>
           {searchUserData?.length ? searchUserData?.map((el:any , index:number)=>{
             return(
@@ -258,16 +242,17 @@ const Requirement = () => {
                 fontSize:'14px'
               }}
             >
-              {(!addInviteInfo?.isLoading && selectUserId === el?.id) ?  <Spinner size='tiny' appearance="primary"   /> : 'Invite'}
+              {(addInviteInfo?.isLoading && selectUserId === el?.id) ?  <Spinner size='tiny' appearance="primary"   /> : 'Invite'}
             </button>
                </div>
             )
-          }) : <div  style={{display:'flex' , justifyContent:'center' , alignContent:'center' , fontWeight:600 , fontSize:'16px'}}> Please  Search User</div> }
+          }) : <div  style={{display:'flex' , justifyContent:'center' , alignContent:'center' , fontWeight:600 , fontSize:'16px', color:'red', marginTop:'50px'}}>User not found</div> }
         </div></ATMDialog>}
       {isOpenShowRequiremet && <ATMDialog size='large' onClose={() => setIsOpenShowRequiremet(false)} title='Requiremt Details'>
       <div style={{ overflowY: "auto", padding: "12px" }}>
         {(singleRequirementDataIsFetching || singleRequirementDataIsLoading) && <ATMBackdrop/>}
-      <div style={{ flex: "1", minWidth: "45%", display: "flex", gap: "5px" , border:'1px solid gray' , padding:'8px' , borderRadius:'10px', marginBottom:'10px' }}>
+      {singleRequirementData?.data?.length ?  <div>
+        <div style={{ flex: "1", minWidth: "45%", display: "flex", gap: "5px" , border:'1px solid gray' , padding:'8px' , borderRadius:'10px', marginBottom:'10px' }}>
           <span style={{ fontWeight: 600 }}>Submitted By:</span>
           <span>{singleJobDetails?.submitted_by}</span>
         </div>
@@ -331,6 +316,7 @@ const Requirement = () => {
           <span>{singleJobDetails?.project}</span>
         </div>
       </div>
+      </div>: <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px', fontSize: '24px', fontWeight: 600 , color:'red' }}> {(!singleRequirementDataIsFetching || !singleRequirementDataIsLoading) &&'No Requirement Found'}</div> }
     </div>
         
         </ATMDialog>}

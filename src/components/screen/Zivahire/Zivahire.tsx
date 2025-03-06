@@ -10,7 +10,6 @@ const Zivahire = () => {
   const dispatch = useDispatch()
   const [selectTab, setSelectedTab] = useState(0)
   const { teamsUserCredential } = useContext(TeamsFxContext);
-  
 
   const { data: userData } = useData(async () => {
     if (teamsUserCredential) {
@@ -24,7 +23,6 @@ const Zivahire = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* Non-Scrollable Header Section */}
       <div style={{ flexShrink: 0 }}>
         <div
           style={{
@@ -42,7 +40,7 @@ const Zivahire = () => {
             display: "flex",
             gap: "8px",
             borderBottom: "1px solid #6264A7",
-            padding: "10px",
+            padding: "10px 10px 0px 20px",
           }}
         >
           <p
@@ -50,10 +48,9 @@ const Zivahire = () => {
               padding: "8px",
               fontSize: "14px",
               fontWeight: 500,
-              color: selectTab === 0 ? "white" : "black",
-              backgroundColor: selectTab === 0 ? "#6264A7" : "white",
-              borderRadius: "10px",
+              color:  selectTab === 0 ? "#6264A7" : "black",
               cursor: "pointer",
+              borderBottom : selectTab === 0 ? '3px solid #6264A7' :'none',
             }}
             onClick={() => {
               setSelectedTab(0);
@@ -65,11 +62,10 @@ const Zivahire = () => {
             style={{
               padding: "8px",
               fontSize: "14px",
-              borderRadius: "10px",
               fontWeight: 500,
-              color: selectTab === 1 ? "white" : "black",
-              backgroundColor: selectTab === 1 ? "#6264A7" : "white",
+              color:  selectTab === 1 ? "#6264A7" : "black",
               cursor: "pointer",
+              borderBottom : selectTab === 1 ? '3px solid #6264A7' :'none',
             }}
             onClick={() => {
               setSelectedTab(1);
@@ -80,7 +76,6 @@ const Zivahire = () => {
         </div>
       </div>
 
-      {/* Scrollable Content Section */}
       <div
         style={{
           flexGrow: 1,

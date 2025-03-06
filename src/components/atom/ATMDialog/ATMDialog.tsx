@@ -1,9 +1,8 @@
 import { ReactNode } from "react";
-import { DismissRegular } from '@fluentui/react-icons';
 
 type DialogProps = {
   onClose: () => void;
-  size?: "small" | "medium" | "large" | "extraLarge";
+  size?: "small" | "medium" | "large" | "extraLarge" | "largeMedium";
   title?: string;
   children?: ReactNode;
 };
@@ -18,6 +17,7 @@ const ATMDialog = ({
     small: { width: "100%", maxWidth: "20rem", height: "10rem" },
     medium: { width: "100%", maxWidth: "28rem", height: "15rem" },
     large: { width: "100%", maxWidth: "40rem", height: "35rem" },
+    largeMedium: { width: "100%", maxWidth: "35rem", height: "25rem" },
     extraLarge: { width: "100%", maxWidth: "64rem", height: "45rem" },
   };
 
@@ -46,19 +46,20 @@ const ATMDialog = ({
         ...sizeStyles[size],
       }}
     >
-      <div style={{ display: "flex", justifyContent: "end", padding: "8px" , position:'absolute' , top:'-12px', right:'-10px' }}>
+      <div style={{ display: "flex", justifyContent: "end", padding: "8px" , position:'absolute' , top:'-10px', right:'-5px' }}>
         <button
           onClick={onClose}
           style={{
             color: "red",
-            fontSize: "1rem",
+            fontSize: "14px",
             border: "none",
             background: "none",
             cursor: "pointer",
             padding: "5px",
+            fontWeight:500 ,
           }}
         >
-          <DismissRegular color="red" fontSize={'20px'} fontWeight={800}/>
+          Close
         </button>
       </div>
       {title && (

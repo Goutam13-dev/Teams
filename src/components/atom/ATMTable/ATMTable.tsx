@@ -1,24 +1,21 @@
 import React from 'react'
 import { format } from 'date-fns';
 
-  // Define the type for the table data
 interface TableRowData {
-    id: number;
-    name: string;
-    created_at: string;
-    invited_users: any;
-    submittedAt: string;
-  }
-  
-  // Define the props for the table component
-  interface TableComponentProps {
-    data: TableRowData[];
-    handleInviteUser:()=>void;
-    handleSeeRequirements:()=>void;
-    setSelectedRequirementId:any;
-  }
+  id: number;
+  name: string;
+  created_at: string;
+  invited_users: any;
+  submittedAt: string;
+}
+interface TableComponentProps {
+  data: TableRowData[];
+  handleInviteUser: () => void;
+  handleSeeRequirements: () => void;
+  setSelectedRequirementId: any;
+}
 
-const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements, handleInviteUser, setSelectedRequirementId }) => {
+const ATMTable: React.FC<TableComponentProps> = ({ data, handleSeeRequirements, handleInviteUser, setSelectedRequirementId }) => {
   return (
     <>
       <style>{`
@@ -29,15 +26,21 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           padding: 16px;
         }
+        .atm-table tr:nth-child(odd) {
+            background-color:#F8F9FA;}
+        .atm-table tr:nth-child(even) {
+             background-color: white;}
         .atm-table {
           width: 100%;
           border-collapse: collapse;
         }
         .atm-table th {
-          background-color: #3F3D56;
+          background-color: #6264A7;
           color: white;
           padding: 12px;
           text-align: left;
+          font-size: 14px;
+          font-weight: 500;
         }
         .atm-table td {
           padding: 12px;
@@ -49,7 +52,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
         .invite-button {
           background-color: #6264A7;
           color: white;
-          padding: 6px 12px;
+          padding: 6px 12px 8px 12px   ;
           border: none;
           cursor: pointer;
           border-radius: 4px;
@@ -59,7 +62,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
         .requirement-button {
           background-color: #28a745;
           color: white;
-          padding: 6px 12px;
+          padding: 6px 12px 8px 12px;
           border: none;
           cursor: pointer;
           border-radius: 4px;
@@ -75,7 +78,7 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
         <table className="atm-table">
           <thead>
             <tr>
-              {["ID", "Name", "Created At", "Invited User", "Submitted At", "Actions"].map(
+              {["Serial No.", "Name", "Created At", "Invited User", "Submitted At", "Actions"].map(
                 (header) => (
                   <th key={header}>{header}</th>
                 )
@@ -83,22 +86,22 @@ const ATMTable : React.FC<TableComponentProps> = ({ data , handleSeeRequirements
             </tr>
           </thead>
           <tbody>
-            {data.map((row) => (
+            {data.map((row, index: number) => (
               <tr key={row.id}>
-                <td>{row.id}</td>
+                <td>{index + 1}</td>
                 <td>{row.name}</td>
                 <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm:ss a")}</td>
-                <td>{row.invited_users?.length ? row?.invited_users.map((el:any)=>el) : "-"}</td>
+                <td>{row.invited_users?.length ? row?.invited_users.map((el: any) => el) : "-"}</td>
                 <td>{row.submittedAt || "-"}</td>
                 <td >
-                  <button onClick={()=>{handleInviteUser() , setSelectedRequirementId(row.id)}} className="invite-button">Invite User</button>
-                  <button onClick={()=>{handleSeeRequirements() , setSelectedRequirementId(row.id)}} className="requirement-button">See Requirement</button>
+                  <button onClick={() => { handleInviteUser(), setSelectedRequirementId(row.id) }} className="invite-button">Invite User</button>
+                  <button onClick={() => { handleSeeRequirements(), setSelectedRequirementId(row.id) }} className="requirement-button">See Requirement</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div> : <div style={{display:'flex' , justifyContent:'center', alignItems:'end' , height:'250px' , fontSize:'24px' , fontWeight:600}}>No requirement Found</div> }
+      </div> : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'end', height: '250px', fontSize: '24px', fontWeight: 600 }}>No requirement Found</div>}
     </>
   )
 }

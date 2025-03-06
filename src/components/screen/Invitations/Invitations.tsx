@@ -143,9 +143,15 @@ const Invitations = () => {
           width: 100%;
           border-collapse: collapse;
         }
+        .atm-table tr:nth-child(odd) {
+            background-color:#F8F9FA;}
+        .atm-table tr:nth-child(even) {
+             background-color: white;}
         .atm-table th {
-          background-color: #3F3D56;
+          background-color: #6264A7;
           color: white;
+          font-size: 14px;
+          font-weight: 500;
           padding: 12px;
           text-align: left;
         }
@@ -187,7 +193,7 @@ const Invitations = () => {
              <table className="atm-table">
             <thead>
               <tr>
-                {["ID", "Name", "Created By", "Created At", "Invited User", "Submitted At", "Actions"].map(
+                {["Serial No.", "Name", "Created By", "Created At", "Invited User", "Submitted At", "Actions"].map(
                   (header) => (
                     <th key={header}>{header}</th>
                   )
@@ -195,9 +201,9 @@ const Invitations = () => {
               </tr>
             </thead>
             <tbody>
-              {invitationsData.map((row: any) => (
+              {invitationsData.map((row: any , index:number) => (
                 <tr key={row.id}>
-                  <td>{row.id}</td>
+                  <td>{index+1}</td>
                   <td>{row.name}</td>
                   <td>{row.created_by}</td>
                   <td>{row.created_at}</td>
@@ -281,6 +287,7 @@ const Invitations = () => {
               <div style={{ marginBottom: '15px' }}>
                 <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Notes</label>
                 <textarea
+                placeholder="Write note..."
                   name="notes"
                   rows={3}
                   value={values.notes}

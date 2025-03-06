@@ -11,6 +11,5 @@ export const store = configureStore({
     getDefaultMiddleware().concat(zivahireServices.middleware),
 });
 
-// Infer RootState and AppDispatch types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
