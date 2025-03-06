@@ -4,7 +4,7 @@ import Invitations from '../Invitations/Invitations';
 import { TeamsFxContext } from "../../Context";
 import { useData } from "@microsoft/teamsfx-react";
 import { useDispatch } from 'react-redux';
-import { setUserId } from '../../redux/slice/zivahireSlice';
+import { setUserId, setUserName } from '../../redux/slice/zivahireSlice';
 
 const Zivahire = () => {
   const dispatch = useDispatch()
@@ -19,6 +19,8 @@ const Zivahire = () => {
   useEffect(() => {
     localStorage.setItem('userData', JSON.stringify(userData) as any)
     dispatch(setUserId(userData?.objectId))
+    dispatch(setUserName(userData?.displayName))
+
   }, [userData])
 
   return (
@@ -33,7 +35,7 @@ const Zivahire = () => {
             marginTop: "20px",
           }}
         >
-          Ziva Hire
+          JivaHire
         </div>
         <div
           style={{

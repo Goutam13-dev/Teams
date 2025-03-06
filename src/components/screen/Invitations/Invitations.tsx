@@ -43,7 +43,7 @@ const Invitations = () => {
       { position, intent: "success" }
     );
 
-  const { useId } = useSelector((state: RootState) => state.counter);
+  const { useId , userName } = useSelector((state: RootState) => state.counter);
   const validationSchema = Yup.object({
     sawMachineAccess: Yup.boolean(),
     jobRole: Yup.string().required("Job Role is required"),
@@ -89,6 +89,7 @@ const Invitations = () => {
     const formattedValue = {
       requirement: selectedInvitationId,
       submitted_by:useId, 
+      submitted_by_name:userName,
       saw_machine_access: values?.sawMachineAccess,
       job_role: values?.jobRole,
       managers_to_work_with: values?.managers,
@@ -104,7 +105,7 @@ const Invitations = () => {
       team: values?.team,
       project: values?.project,
       vendor_name: values?.vendorName,
-      start_date:values.startDate ?  format(new Date(values.startDate), "yyyy-MM-dd") :format(new Date(), "yyyy-MM-dd"),
+      start_date:values.startDate ?  format(new Date(values.startDate), "yyyy-MM-dd") :null,
       status: values?.status
     }
     try {
@@ -119,8 +120,7 @@ const Invitations = () => {
 
   const { data, isFetching, isLoading } = useGetInvitationsQuery(useId, { skip: !useId });
 
-  useEffect(() => {
-   
+  useEffect(()=>{
     if (!isFetching && !isLoading) {
       setInvitationsData(data?.data)
     }
@@ -193,7 +193,7 @@ const Invitations = () => {
              <table className="atm-table">
             <thead>
               <tr>
-                {["Serial No.", "Name", "Created By", "Created At", "Invited User", "Submitted At", "Actions"].map(
+                {["Serial No.", "Name", "Created By", "Created At", "Actions"].map(
                   (header) => (
                     <th key={header}>{header}</th>
                   )
@@ -205,10 +205,8 @@ const Invitations = () => {
                 <tr key={row.id}>
                   <td>{index+1}</td>
                   <td>{row.name}</td>
-                  <td>{row.created_by}</td>
-                  <td>{row.created_at}</td>
-                  <td>{row.invited_users?.map((el: any) => el) || "-"}</td>
-                  <td>{row.submitted_at || "-"}</td>
+                  <td>{row.created_by_name}</td>
+                  <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm a")}</td>
                   <td>
                     <button onClick={() => { setSelectedInvitationId(row.id), setIsOpenFormDialog(true) }} className="invite-button">Fill Form</button>
                   </td>

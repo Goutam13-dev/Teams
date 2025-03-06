@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState = {
- useId : ''
+ useId : '',
+ userName:''
 
 };
 
@@ -12,9 +13,12 @@ const zivahireSlice = createSlice({
     setUserId: (state, action) => {
       state.useId = action.payload;
     },
+    setUserName: (state, action) => {
+      state.userName = action.payload;
+    },
 
   },
 });
 
-export const {setUserId } = zivahireSlice.actions;
+export const {setUserId, setUserName } = zivahireSlice.actions;
 export default zivahireSlice.reducer;

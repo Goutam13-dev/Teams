@@ -14,8 +14,8 @@ interface TableComponentProps {
   handleSeeRequirements: () => void;
   setSelectedRequirementId: any;
 }
-
 const ATMTable: React.FC<TableComponentProps> = ({ data, handleSeeRequirements, handleInviteUser, setSelectedRequirementId }) => {
+
   return (
     <>
       <style>{`
@@ -90,8 +90,8 @@ const ATMTable: React.FC<TableComponentProps> = ({ data, handleSeeRequirements, 
               <tr key={row.id}>
                 <td>{index + 1}</td>
                 <td>{row.name}</td>
-                <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm:ss a")}</td>
-                <td>{row.invited_users?.length ? row?.invited_users.map((el: any) => el) : "-"}</td>
+                <td>{format(new Date(row.created_at), "dd MMM yyyy hh:mm a")}</td>
+                <td style={{fontSize:'14px'}}>{row.invited_users?.length ? row?.invited_users?.[0]?.map((el: any) =>`${el?.displayName}, `) : "-"}</td>
                 <td>{row.submittedAt || "-"}</td>
                 <td >
                   <button onClick={() => { handleInviteUser(), setSelectedRequirementId(row.id) }} className="invite-button">Invite User</button>

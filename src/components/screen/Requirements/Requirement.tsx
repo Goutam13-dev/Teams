@@ -14,10 +14,15 @@ import {
 import ATMBackdrop from '../../atom/ATMBackdrop/ATMBackdrop';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { format } from 'date-fns';
+import { useSearchOrganizationUsersQuery } from '../../redux/service/usersearchService';
 
 
+type User = {
+  id: number;
+  displayName: string;
+};
 const Requirement = () => {
-  const { useId } = useSelector((state: RootState) => state.counter);
+  const { useId , userName } = useSelector((state: RootState) => state.counter);
 
   const [addRequirements, addDataIsLoading] = useCreateRequiremmentMutation()
   const [addInvite , addInviteInfo] = useAddInviteUsersMutation()
@@ -31,14 +36,14 @@ const Requirement = () => {
   const [showError, setShowError] = useState(false)
   const [requirementsData, setRequirementsData] = useState([])
   const [selectedRequirementId, setSelectedRequirementId] = useState('')
-  const [searchUserData  , setSearchUserData] = useState([])
-  const [selectUserId  , setSelectUserId] = useState('')
+   const [searchUserStateData  , setSearchUserStateData] = useState([])
   const [singleJobDetails, setSingleJobDetails] = useState<any>({})
-  const [accessToken , setAccessToken] = useState('')
-
+  const [graphTokenState , setGraphTokenState] = useState('')
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  
   const handleAddRequirements = async () => {
     try {
-      await addRequirements({ name: serachValue, created_by: useId }).unwrap();
+      await addRequirements({ name: serachValue, created_by: useId , created_by_name : userName }).unwrap();
       setIsOpenDialog(false)
       notify('Requirement added  successfully.')
     } catch (error) {
@@ -60,6 +65,20 @@ const Requirement = () => {
       setSingleJobDetails(singleRequirementData?.data?.[0])
     }
   }, [singleRequirementData, singleRequirementDataIsFetching, singleRequirementDataIsLoading, selectedRequirementId, isOpenShowRequiremet])
+
+  useEffect(() => {
+    const fetchTokens = async () => {
+      try {
+        const accessToken = await getClientSideToken();
+        const graphToken = await getOboToken(accessToken);
+        setGraphTokenState(graphToken);
+      } catch (error) {
+        console.error("Error fetching tokens:", error);
+      }
+    };
+    fetchTokens();
+  }, []);
+ 
 
    const getClientSideToken = async () => {
       try {
@@ -93,28 +112,15 @@ const Requirement = () => {
         }
       };
   
-    const searchUsers = async (query:string) => {
-      const accessToken = await getClientSideToken();
-      const graphToken = await getOboToken(accessToken) ;
-      setAccessToken(graphToken)
-      const url = `https://graph.microsoft.com/v1.0/users/?$filter=startswith(displayName, '${encodeURIComponent(query)}')`;
-      try {
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${graphToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+    
+    const  {data:searchUserData , isLoading:searchUserDataIsLoading , isFetching:searchUserDataIsFetching}=useSearchOrganizationUsersQuery({graphToken:graphTokenState , query:inviteUserValue})
   
-        const data = await response.json();
-        setSearchUserData(data.value)
-        return data.results; // List of users 
-      } catch (error) {
-        console.error("Error searching users:", error);
-        return [];
-      }
-    };
+    useEffect(()=>{
+ if(!searchUserDataIsLoading && !searchUserDataIsFetching ){
+  setSearchUserStateData(searchUserData?.value)
+ }
+    },[searchUserDataIsLoading ,searchUserDataIsFetching , searchUserData])
+
 
   const { dispatchToast } = useToastController('12345');
   const position = "top";
@@ -126,22 +132,37 @@ const Requirement = () => {
       { position, intent: "success" }
     );
 
-    const handleSearchUsers =(e:any)=>{
-      searchUsers(e.target.value)
-      setinviteUserValue(e.target.value)
-    }
 
-    const handleAddInviteUser= async (value:any)=>{
-      setSelectUserId(value)
+    const handleAddInviteUserAPI = async ()=>{
       try {
-        await addInvite({ invitedUsers: [`${value}`], requirementId: selectedRequirementId }).unwrap();
-        setIsOpenDialog(false)
+        await addInvite({ invitedUsers: [selectedUsers], requirementId: selectedRequirementId }).unwrap();
         notify('User Invited successfully.')
+        setSelectedUsers([])
+        setinviteUserValue('')
+        setIsOpenInviteDialog(false)
       } catch (error) {
         console.error('Failed to save the post:', error);
       }
     }
 
+    const handleSearchUsers = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setinviteUserValue(e.target.value);
+    };
+  
+    const handleAddInviteUser = (user: any) => {
+      if (!selectedUsers.some((u) => u.id === user.id)) {
+        let newValue={
+          id:user?.id,
+          displayName:user?.displayName
+        }
+        setSelectedUsers([...selectedUsers, newValue]);
+        setinviteUserValue(""); 
+      }
+    };
+  
+    const handleRemoveUser = (id: number) => {
+      setSelectedUsers(selectedUsers.filter((user) => user.id !== id));
+    };
   return (
     <div>
       <Toaster toasterId={"12345"} />
@@ -205,48 +226,85 @@ const Requirement = () => {
           </div>
         </div></ATMDialog>}
       {isOpenInviteDialog && <ATMDialog size='largeMedium' onClose={() => setIsOpenInviteDialog(false)} title='Invite Users'>
-        <div style={{ overflowY: "auto", padding: "12px" }}>
+        <div style={{ overflowY: "auto", padding: "12px"}}>
 
-          <div style={{ flex: '1', minWidth: '45%', display: 'flex', flexDirection: 'column' }}>
-            <label style={{ fontWeight: 'bold', marginBottom: '5px' }}>Search User</label>
-            <input
-            placeholder='Enter user name'
-             value={inviteUserValue}
-             onChange={handleSearchUsers}
-             style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-            />
-            {/* <select name="userType" value={inviteUserValue} onChange={(e: any) => {
-              setinviteUserValue(e.target.value)
-            }} required style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
-              <option value="">Select a user</option>
-              {users.map((user, index) => (
-                <option key={index} value={user}>{user}</option>
-              ))}
-            </select> */}
+        <div style={{ flex: "1", minWidth: "45%", display: "flex", flexDirection: "column" }}>
+          <div style={{display:'flex' , gap:'5px'}}>
+            <span style={{fontSize:'12px' , fontWeight:500 , color:'black'}}>Note :</span>
+          <span style={{fontSize:'12px' , fontWeight:500 , color:'#DD960F'}}>You can invite multiple users.</span>
           </div>
-          {searchUserData?.length ? searchUserData?.map((el:any , index:number)=>{
-            return(
-               <div key={index} style={{display:'flex' , justifyContent:'space-between' , margin:'10px' ,}}>
-               <div style={{fontSize:'14px' , fontWeight:600}}>{index+1}. {el?.displayName}</div>
-                <button
-                disabled={addInviteInfo?.isLoading}
-               onClick={()=>{handleAddInviteUser(el?.id)}}
+      <label style={{ fontWeight: "bold", marginBottom: "5px" }}>Search User</label>
+      
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "5px", marginBottom: "5px" }}>
+        {selectedUsers.map((user) => (
+          <div key={user.id} style={{ display: "flex", alignItems: "center", background: "#3B82F6", color: "white", padding: "3px 5px", borderRadius: "15px" , fontSize:'10px' }}>
+            {user.displayName}
+            <span 
+              onClick={() => handleRemoveUser(user.id)} 
+              style={{ marginLeft: "8px", cursor: "pointer", fontWeight: "bold" }}>
+              &times;
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <input
+        placeholder="Enter user name"
+        value={inviteUserValue}
+        onChange={handleSearchUsers}
+        style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px" }}
+      />
+
+      {searchUserStateData?.length ? (
+        searchUserStateData
+          ?.filter((el:any) => el?.displayName.toLowerCase()?.includes(inviteUserValue?.toLowerCase()))
+          ?.map((el :any, index) => (
+            <div key={index} style={{ display: "flex", justifyContent: "space-between", margin: "10px" }}>
+              <div style={{ fontSize: "14px", fontWeight: 600 }}>
+                {index + 1}. {el?.displayName}
+              </div>
+              <button
+                onClick={() => handleAddInviteUser(el)}
+                disabled={selectedUsers?.some((u) =>u.id === el.id)}
                 style={{
-                padding: "4px 16px",
-                backgroundColor: "#3B82F6",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize:'14px'
-              }}
-            >
-              {(addInviteInfo?.isLoading && selectUserId === el?.id) ?  <Spinner size='tiny' appearance="primary"   /> : 'Invite'}
-            </button>
-               </div>
-            )
-          }) : <div  style={{display:'flex' , justifyContent:'center' , alignContent:'center' , fontWeight:600 , fontSize:'16px', color:'red', marginTop:'50px'}}>User not found</div> }
-        </div></ATMDialog>}
+                  padding: "4px 16px",
+                  backgroundColor: "#3B82F6",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "14px"
+                }}
+              >
+                {selectedUsers?.some((u) => u.id === el.id) ? "Added" : "Invite"}
+              </button>
+            </div>
+          ))
+      ) : (
+        <div style={{ display: "flex", justifyContent: "center", fontWeight: 600, fontSize: "16px", color: "red", marginTop: "50px" }}>
+          User not found
+        </div>
+      )}
+    </div>
+    <div style={{display:'flex', justifyContent:'end' , alignItems:'end', marginTop:'30px', borderTop:'1px solid black' , paddingTop:'10px'}}>
+    <button
+                type="submit"
+                onClick={()=>handleAddInviteUserAPI()}
+                style={{
+                  width: "18%",
+                  padding: "5px",
+                  backgroundColor: "#3B82F6",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
+              >
+                {addInviteInfo?.isLoading ?  <Spinner size='tiny'/> : 'Invite All'}
+              </button>
+    </div>
+        </div>
+        </ATMDialog>}
       {isOpenShowRequiremet && <ATMDialog size='large' onClose={() => setIsOpenShowRequiremet(false)} title='Requiremt Details'>
       <div style={{ overflowY: "auto", padding: "12px" }}>
         {(singleRequirementDataIsFetching || singleRequirementDataIsLoading) && <ATMBackdrop/>}
@@ -319,7 +377,7 @@ const Requirement = () => {
     </div>
         
         </ATMDialog>}
-        <div>Graph : {accessToken}</div>
+        <div>Graph : {graphTokenState}</div>
     </div>
   )
 }
