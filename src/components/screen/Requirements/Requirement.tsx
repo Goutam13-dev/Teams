@@ -34,7 +34,7 @@ const Requirement = () => {
   const [searchUserData  , setSearchUserData] = useState([])
   const [selectUserId  , setSelectUserId] = useState('')
   const [singleJobDetails, setSingleJobDetails] = useState<any>({})
-  
+  const [accessToken , setAccessToken] = useState('')
 
   const handleAddRequirements = async () => {
     try {
@@ -96,6 +96,7 @@ const Requirement = () => {
     const searchUsers = async (query:string) => {
       const accessToken = await getClientSideToken();
       const graphToken = await getOboToken(accessToken) ;
+      setAccessToken(graphToken)
       const url = `https://graph.microsoft.com/v1.0/users/?$filter=startswith(displayName, '${encodeURIComponent(query)}')`;
       try {
         const response = await fetch(url, {
@@ -140,8 +141,6 @@ const Requirement = () => {
         console.error('Failed to save the post:', error);
       }
     }
-
-console.log(singleJobDetails)
 
   return (
     <div>
@@ -320,6 +319,7 @@ console.log(singleJobDetails)
     </div>
         
         </ATMDialog>}
+        <div>Graph : {accessToken}</div>
     </div>
   )
 }
