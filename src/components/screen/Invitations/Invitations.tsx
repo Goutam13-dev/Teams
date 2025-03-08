@@ -10,10 +10,12 @@ import { Form, Formik, ErrorMessage } from "formik";
 import { format } from "date-fns";
 import { Edit12Regular } from '@fluentui/react-icons';
 import {Tooltip } from "@fluentui/react-components";
+import { useGetJobDescriptionByPromptMutation } from "../../redux/service/userpromptService";
 
 
 interface FormValues {
   sawMachineAccess: boolean;
+  job_description:string;
   jobRole: string;
   managers: string;
   groupName: string;
@@ -36,16 +38,35 @@ const Invitations = () => {
   const [invitationsData, setInvitationsData] = useState([]);
   const [selectedInvitationId, setSelectedInvitationId] = useState('')
   const [invitationnRequirement, setInvitationRequirement] = useState<any>({})
-  const [wantToEdit , setWantToEdit] = useState(false)
+  const [wantToEdit , setWantToEdit] = useState(false) 
+  const [promptValue, setPromptValue] = useState("");
+  const [error, setError] = useState("");
+
+  const validatePrompt = (value:any) => {
+    if (!value.trim()) return "Prompt is required.";
+    if (value.trim().length < 20) return "Prompt must be at least 20 characters.";
+    return "";
+  };
+
+  const handleBlur = () => {
+    setError(validatePrompt(prompt));
+  };
+  const  [promptData , setPrompData] = useState({
+    job_title:'',
+    job_description:'',
+    message:''
+  })
 
   const [addRequirements, addDataIsLoading] = useCreateInvitationFormMutation()
-  const [updateRequirements, updateDataIsLoading] =useUpdateInviteRequirementsMutation()
+  const [updateRequirements, updateDataIsLoading] =useUpdateInviteRequirementsMutation() 
+  const [addPrompt , addPromptInfo] = useGetJobDescriptionByPromptMutation()
+
   const position = "top";
   const { dispatchToast } = useToastController('1234589');
-  const notify = () =>
+  const notify = (msg:string) =>
     dispatchToast(
       <Toast>
-        <ToastTitle>Requirement added  successfully.</ToastTitle>
+        <ToastTitle>{msg}</ToastTitle>
       </Toast>,
       { position, intent: "success" }
     );
@@ -76,7 +97,8 @@ const Invitations = () => {
 
   const initialValues: FormValues = {
     sawMachineAccess: invitationnRequirement?.submitted_by_name || false,
-    jobRole: invitationnRequirement?.job_role || "",
+    jobRole: invitationnRequirement?.job_role || promptData?.job_title,
+    job_description:promptData?.job_description,
     managers: invitationnRequirement?.managers_to_work_with || "",
     groupName: invitationnRequirement?.group_name || "",
     location: invitationnRequirement?.location_remote || "",
@@ -96,10 +118,11 @@ const Invitations = () => {
 
 
   const handleSubmit = async (values: any) => {
-    const formattedValue = {
+    const formattedValue  = {
       requirement: selectedInvitationId,
       submitted_by : [{ [useId]: userName }],
       submitted_by_name:userName,
+      job_description:values?.job_description || " ",
       saw_machine_access: values?.sawMachineAccess,
       job_role: values?.jobRole,
       managers_to_work_with: values?.managers,
@@ -122,7 +145,7 @@ const Invitations = () => {
       try {
         await  updateRequirements(formattedValue).unwrap();
         setIsOpenFormDialog(false)
-        notify()
+        notify('Requirement updated successfully.')
       } catch (error) {
         console.error('Failed to save the post:', error);
       }
@@ -130,10 +153,22 @@ const Invitations = () => {
       try {
         await addRequirements(formattedValue).unwrap();
         setIsOpenFormDialog(false)
-        notify()
+        notify('Requirement added  successfully.')
       } catch (error) {
         console.error('Failed to save the post:', error);
       }
+    }
+  };
+
+  const handleAddPrompt = async () => {
+    try {
+      const response = await addPrompt({ prompt: promptValue }).unwrap();
+      if (response) {
+        notify(response.message); 
+        setPrompData(response)
+      }
+    } catch (error: any) {
+      console.error("Failed to save the post:", error);
     }
   };
 
@@ -238,7 +273,7 @@ const Invitations = () => {
           </table>
           </div> : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '250px', fontSize: '24px', fontWeight: 600 }}>No Invitations Found</div>}
       </div>
-      {isOpenFormDialog && <ATMDialog size='large' title='Invitation Details' onClose={() => setIsOpenFormDialog(false)}>
+      {isOpenFormDialog && <ATMDialog size='extraLarge' title='Invitation Details' onClose={() => setIsOpenFormDialog(false)}>
         <div>
          {InvitationRequirementData?.present &&  <div onClick={()=>setWantToEdit(!wantToEdit)} style={{display:'flex' , justifyContent:'end', cursor:'pointer'}}>
             <Tooltip content="Edit" relationship="label" >
@@ -251,7 +286,7 @@ const Invitations = () => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting, values, setFieldValue }) => (
+          {({ isSubmitting, values, setFieldValue, handleBlur , errors }) => (
             <Form
               style={{
                 margin: "auto",
@@ -259,24 +294,80 @@ const Invitations = () => {
                 border: "1px solid #ccc",
                 borderRadius: "8px",
                 boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                maxWidth: "700px",
                 backgroundColor: "#fff",
               }}
             >
               
               {(InvitationRequirementDataIsLoading || InvitationRequirementDataIsLoading  ) && <ATMBackdrop />}
+
               <div style={{ marginBottom: "15px" }}>
-                <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
-                  <input
-                  disabled={wantToEdit}
-                    type="checkbox"
-                    name="sawMachineAccess"
-                    checked={values.sawMachineAccess}
-                    onChange={(e) => setFieldValue("sawMachineAccess", e.target.checked)}
-                  />
-                  SAW Machine Access
-                </label>
+              <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
+                       Prompt
+                      </label>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          border: "1px solid #ccc",
+          borderRadius: "5px",
+          overflow: "hidden",
+          maxWidth: "500px",
+        }}
+      >
+        <input
+          onBlur={handleBlur}
+          value={promptValue}
+          onChange={(e:any)=>{
+            setPromptValue(e.target.value)
+            setError(validatePrompt(e.target.value))
+          }}
+          placeholder="Write your prompt..."
+          style={{
+            flexGrow: 1,
+            padding: "8px",
+            border: "none",
+            outline: "none",
+          }}
+        />
+        <button
+          disabled={!!error || addPromptInfo.isLoading ||!promptValue}
+          type="button"
+          onClick={handleAddPrompt}
+          style={{
+            backgroundColor: error ? "#ccc" : "#007BFF",
+            padding: "8px 12px",
+            border: "none",
+            cursor: error ? "not-allowed" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+          }}
+        >
+          {addPromptInfo.isLoading ? <Spinner size="tiny" /> : "Generate Job Description"}
+        </button>
+      </div>
+      {error && <div style={{ color: "red", fontSize: "12px" }}>{error}</div>}
+    </div>
+               
+
+                <div style={{ marginBottom: '15px' }}>
+                <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>Job Description<span style={{ color: "red" }}>*</span></label>
+                <textarea
+                 disabled={wantToEdit}
+                placeholder="Write job description..."
+                  name="job_description"
+                  rows={20}
+                  value={values.job_description}
+                  onChange={(e) => setFieldValue("job_description", e.target.value)}
+                  style={{ width: "100%", padding: "8px", border: "1px solid #ccc", borderRadius: "4px", resize: "none" }}
+                />
+                <ErrorMessage name="job_description">
+                  {(msg) => <div style={{ color: "red", fontSize: "12px" }}>{msg}</div>}
+                </ErrorMessage>
               </div>
+
+             
 
               {[
                 ["jobRole", "managers"],
@@ -287,10 +378,11 @@ const Invitations = () => {
                 ["vendorName", "startDate"],
               ].map(([name1, name2]) => (
                 <div key={name1} style={{ display: "flex", gap: "20px", marginBottom: '8px' }}>
-                  {[name1, name2].map((name) => (
-                    <div key={name} style={{ flex: "1" }}>
+                  {[name1, name2].map((name) =>{
+                    return(
+                      <div key={name} style={{ flex: "1" }}>
                       <label style={{ fontWeight: "bold", display: "block", marginBottom: "5px" }}>
-                        {name.replace(/([A-Z])/g, " $1").trim()}
+                        {name.replace(/([A-Z])/g, " $1").trim()}{(name === "jobRole" || name === "location" || name === "positions") && <span style={{ color: "red" }}>*</span>}
                       </label>
                       <input
                        disabled={wantToEdit}
@@ -309,7 +401,8 @@ const Invitations = () => {
                         {(msg) => <div style={{ color: "red", fontSize: "12px" }}>{msg}</div>}
                       </ErrorMessage>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               ))}
 
@@ -349,6 +442,16 @@ const Invitations = () => {
                     onChange={(e) => setFieldValue("timezoneOk", e.target.checked)}
                   />
                   ET/MT/CT Timezone OK?
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                  <input
+                  disabled={wantToEdit}
+                    type="checkbox"
+                    name="sawMachineAccess"
+                    checked={values.sawMachineAccess}
+                    onChange={(e) => setFieldValue("sawMachineAccess", e.target.checked)}
+                  />
+                  SAW Machine Access
                 </label>
               </div>
 

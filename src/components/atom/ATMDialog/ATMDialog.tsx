@@ -18,7 +18,7 @@ const ATMDialog = ({
     medium: { width: "100%", maxWidth: "28rem", height: "15rem" },
     large: { width: "100%", maxWidth: "40rem", height: "35rem" },
     largeMedium: { width: "100%", maxWidth: "35rem", height: "25rem" },
-    extraLarge: { width: "100%", maxWidth: "64rem", height: "45rem" },
+    extraLarge: { width: "100%", maxWidth: "70rem", height: "38rem" },
   };
 
 

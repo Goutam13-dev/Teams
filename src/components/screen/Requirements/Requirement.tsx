@@ -16,7 +16,6 @@ import * as microsoftTeams from "@microsoft/teams-js";
 import { format } from 'date-fns';
 import { useSearchOrganizationUsersQuery } from '../../redux/service/usersearchService';
 
-
 type User = {
   id: number;
   displayName: string;
@@ -26,7 +25,6 @@ const Requirement = () => {
 
   const [addRequirements, addDataIsLoading] = useCreateRequiremmentMutation()
   const [addInvite , addInviteInfo] = useAddInviteUsersMutation()
-
 
   const [isOpenDialog, setIsOpenDialog] = useState(false)
   const [isOpenInviteDialog, setIsOpenInviteDialog] = useState(false)
