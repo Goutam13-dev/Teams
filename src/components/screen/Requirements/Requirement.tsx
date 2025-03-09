@@ -313,8 +313,14 @@ const Requirement = () => {
         </div>
         <div style={{ flex: "1", minWidth: "45%", display: "flex", gap: "5px" , border:'1px solid gray' , padding:'8px' , borderRadius:'10px' }}>
           <span style={{ fontWeight: 600 }}>Submitted Date:</span>
-          <span>{singleJobDetails?.submitted_date ? format(new Date(singleJobDetails?.submitted_date), "dd MMM yyyy hh:mm:ss a"): '-'}</span>
+          <span>{singleJobDetails?.submitted_date ? format(new Date(singleJobDetails?.submitted_date), "dd MMM yyyy hh:mm a"): '-'}</span>
         </div>
+       <div style={{ marginTop:'15px'}}>
+       <span style={{ fontWeight: 600 , paddingLeft:'5px' , fontSize:'16px'}}>Job Description</span>
+        <div style={{ flex: "1", minWidth: "45%",  gap: "5px" , border:'1px solid gray' , padding:'8px' , borderRadius:'10px', marginBottom:'10px' , marginTop:'5px'}}>
+          <span>{singleJobDetails?.job_description}</span>
+        </div>
+       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", paddingBottom: '8px' , paddingTop:'8px' }}>
         <div style={{ flex: "1", minWidth: "45%", display: "flex", gap: "5px",  border:'1px solid gray' , padding:'8px' , borderRadius:'10px' }}>
           <span style={{ fontWeight: 600 }}>Job Role:</span>

@@ -5,6 +5,7 @@ import { TeamsFxContext } from "../../Context";
 import { useData } from "@microsoft/teamsfx-react";
 import { useDispatch } from 'react-redux';
 import { setUserId, setUserName } from '../../redux/slice/zivahireSlice';
+import Reports from '../Reports/Reports';
 
 const Zivahire = () => {
   const dispatch = useDispatch()
@@ -75,6 +76,21 @@ const Zivahire = () => {
           >
             Invitations
           </p>
+          <p
+            style={{
+              padding: "8px",
+              fontSize: "14px",
+              fontWeight: 500,
+              color:  selectTab === 2 ? "#6264A7" : "black",
+              cursor: "pointer",
+              borderBottom : selectTab === 2 ? '3px solid #6264A7' :'none',
+            }}
+            onClick={() => {
+              setSelectedTab(2);
+            }}
+          >
+           Reports
+          </p>
         </div>
       </div>
 
@@ -87,6 +103,7 @@ const Zivahire = () => {
       >
         {selectTab === 0 && <Requirement />}
         {selectTab === 1 && <Invitations />}
+        {selectTab === 2 && <Reports/>}
       </div>
     </div>
 

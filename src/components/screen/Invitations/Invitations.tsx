@@ -98,7 +98,7 @@ const Invitations = () => {
   const initialValues: FormValues = {
     sawMachineAccess: invitationnRequirement?.submitted_by_name || false,
     jobRole: invitationnRequirement?.job_role || promptData?.job_title,
-    job_description:promptData?.job_description,
+    job_description: invitationnRequirement?.job_description || promptData?.job_description,
     managers: invitationnRequirement?.managers_to_work_with || "",
     groupName: invitationnRequirement?.group_name || "",
     location: invitationnRequirement?.location_remote || "",
@@ -185,9 +185,11 @@ const Invitations = () => {
     }
   }, [InvitationRequirementDataIsFetching, InvitationRequirementData, InvitationRequirementDataIsLoading])
 
+
   return (
     <div>
       <Toaster toasterId={"1234589"} />
+       
       <style>{`
         .table-container {
           overflow-x: auto;
@@ -315,6 +317,7 @@ const Invitations = () => {
         }}
       >
         <input
+          disabled={wantToEdit}
           onBlur={handleBlur}
           value={promptValue}
           onChange={(e:any)=>{
